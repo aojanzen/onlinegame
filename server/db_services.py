@@ -51,47 +51,80 @@ def create_session():
 # GAME-RELATED FUNCTIONS
 
 def create_player(name):
-    print(f"Creating new player {name}...")
+    print(f"Creating new player: {name}...")
     session = create_session()
 
     player = session.query(Player).filter(Player.name == name).first()
 
     if player:
         print(f"\nPlayer already exists: {player.name}")
-        return None
+        return player
+    else:
+        player = Player()
+        player.name = name
+        session.add(player)
+        session.commit()
+        session.close
 
-    player = Player()
-    player.name = name
-    session.add(player)
-    session.commit()
-    session.close
-
-    player = session.query(Player).filter(player.name == name)
-    return player
+        player = session.query(Player).filter(player.name == name).first()
+        return player
 
 
-def new_game(player_name):
+def get_player(name):
+    session = create_session()
+
+    player = session.query(Player).filter(Player.name == name).first()
+
+    if not player:
+        raise Exception(f"Player {name} does not exist in database!")
+    else:
+        return player
+
+
+def new_game(player, secret_number=0, guesses=[], date=None):
     # game_id, player_id, game_date, secret_number, guesses
     new_id = uuid.uuid4()
     print(f"Creating new game {new_id}")
 
     session = create_session()
+    # game = session.query(Game).filter(Game.game_id == new_id).all()
+    game = None
 
-    game = Game()
-    game.game_id = new_id
-    game.player = player_name
+    if game:
+        print(f"\nGame already exists: {game.game_id}")
+        return None
+    else:
+        game = Game()
+        game.game_id = str(new_id)
+        game.player_id = player.id
+        game.secret_number = secret_number
+        game.guesses = " ".join([str(i) for i in guesses])
+        if date:
+            game.date = date
 
-    session.add(game)
-    session.commit()
-    session.close()
+        session.add(game)
+        session.commit()
+        session.close()
 
-    game = session.query(Game).filter(game.id == new_id)
-    return game
-
-
-def retrieve_game():
-    pass
+        game = session.query(Game).filter(Game.game_id == new_id)
+        return game
 
 
-def store_game():
-    pass
+def retrieve_game(game_identifier):
+    session = create_session()
+
+    game = session.query(Game).filter(Game.game_id == game_identifier).first()
+
+    if not game:
+        raise Exception(f"Game {game_id} does not exist in database!")
+    else:
+        return game
+
+
+def retrieve_all_games(player):
+    session = create_session()
+
+    game_list = session.query(Game).filter(Game.player_id ==
+            player.player_id).all()
+
+    return game_list 

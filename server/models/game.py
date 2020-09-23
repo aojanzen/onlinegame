@@ -19,7 +19,7 @@ from models.model_base import ModelBase
 class Game(ModelBase):
     __tablename__ = "games"
 
-    game_id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True,
+    game_id = sqlalchemy.Column(sqlalchemy.String, primary_key=True,
                            default=uuid.uuid4())
     player_id = sqlalchemy.Column(sqlalchemy.Integer)
     game_date = sqlalchemy.Column(sqlalchemy.DateTime,
